@@ -1,0 +1,33 @@
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block extra_scripts %}
+{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <div class="jumbotron">
+    <h1>Great! Let's get started.</h1>
+    <p>First of all, we need to know what kind of user you are.
+</div>
+    <div class="row">
+        <div class="col-md-6">
+            <h2>I represent an organization</h2>
+            <p>I want to create rosters and assign people to them.</p>
+        </div>
+        <div class="col-md-6">
+            <h2>I'm an invididual</h2>
+            <p>I want to use Rosterra to connect with my team, company,
+            or organization and keep up to date with rostering.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <a class="btn btn-default" href="{% url 'main.views.signup_company' %}">Let's go!</a>
+        </div>
+        <div class="col-md-6">
+            <a class="btn btn-default" href="{% url 'main.views.signup_individual' %}">Let's go!</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

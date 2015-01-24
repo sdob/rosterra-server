@@ -1,0 +1,73 @@
+{% load staticfiles %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charest="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{% static 'main/jumbotron-narrow.css' %}">
+        <link rel="stylesheet" href="{% static 'main/overrides.css' %}">
+        <link href='http://fonts.googleapis.com/css?family=Pacifico|Source+Sans+Pro:400,600,700,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="js/html5shiv.js"></script>
+        <script src="js/respond.min.js"></script>
+        <![endif]-->
+        {% block extra_stylesheets %}{% endblock %}
+        <style type="text/css">
+            body {
+                font-family: "Source Sans Pro" !important;
+            }
+            .branding {
+                font-family: "Pacifico" !important;
+            }
+        </style>
+        <title>Rosterra | {% block menubar_subtitle %}Rostering, disrupted{% endblock %}</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("[data-toggle='tooltip']").tooltip();
+            });
+        </script>
+        {% block extra_scripts %}{% endblock %}
+    </head>
+    <body>
+        {% block navbar %}
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle"
+                        data-toggle="collapse" data-target="#navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand branding" href="#">Rosterra </a> 
+                </div>
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    {% if user.is_authenticated %}
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-calendar"></span> Rosters</a>
+                        <li><a href="#"><span class="glyphicon glyphicon-list"></span> Stats</a>
+                        <li><a href="#"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+                    </ul>
+                    {% endif %}
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'main.views.logout' %}"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Log in</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+        {% block main_content %}
+        {% endblock %}
+    </body>
+</html>

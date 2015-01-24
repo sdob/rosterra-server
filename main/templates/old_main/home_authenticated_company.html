@@ -1,0 +1,52 @@
+{% extends 'main/home_authenticated.html' %}
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+{% endblock %}
+
+{% block menubar_subtitle %}Home{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-2">
+            <img class="img-responsive img-circle" src="http://lorempixel.com/500/500/abstract">
+        </div>
+        <div class="col-md-10">
+            <h1>{{ company_name }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            {% if employees or offers or join_requests %}
+            <h2>Employees</h2>
+            <div class="list-group">
+                {% comment %}Show actual employees first{% endcomment %}
+                {% spaceless %}
+                {% for employee in employees %}
+                <a href="{% url 'show-employee-roster' username=employee.user.username %}" class="list-group-item">{{ employee }}</a>
+                {% endfor %}
+                {% comment %}Followed by offers we've made, not yet accepted by employees{% endcomment %}
+                {% for offer in offers %}
+                <a href="#" class="list-group-item list-group-item-warning">{{ offer }}</a>
+                {% endfor %}
+                {% endspaceless %}
+                {% comment %}Finally, employees *we* haven't accepted yet{% endcomment %}
+            </div>
+            {% else %}
+            Nobody here yet!
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>Locations</h2>
+            {% if locations %}
+            <div class="list-group">
+                {% for location in locations %}
+                <div>{{ location }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

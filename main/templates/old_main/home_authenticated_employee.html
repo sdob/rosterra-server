@@ -1,0 +1,39 @@
+{% extends 'main/base.html' %}
+{% load staticfiles %}
+
+{% block extra_stylesheets %}
+<style type="text/css">
+    h1.company {
+        border-bottom: solid 1px #999999;
+    }
+</style>
+{% endblock %}
+
+{% block menubar_subtitle %}Home{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+            <img class="img-responsive" src="http://lorempixel.com/50/50/abstract">
+            {% if employee.company_set %}
+            {% for company in employee.company_set.all %}
+            <h1 class="company">{{ company.name }}</h1>
+            {% if company.employee_s %}
+            <div class="list-group">
+                <a href="#" class="list-group-item disabled">Employees</a>
+                {% for employee in company.employees %}
+                <a href="#" class="list-group-item">{{ employee.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}{# if company.employees #}
+            {% endfor %}
+            {% else %}
+            <div>You haven't set up a company yet.</div>
+            {% endif %}
+        </div>
+        <div class="col-sm-9">
+        </div>
+    </div>
+</div>
+{% endblock %}
