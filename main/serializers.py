@@ -5,11 +5,14 @@ from custom_auth.serializers import UserSerializer
 from models import Employee, Company, Employment, Location, RosterEntry
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    #user = UserSerializer() # include user information
     class Meta:
         model = Employee
         #read_only_fields = ('user',)
         fields = ('id', 'name', )
+
+class EmployeeFullSerializer(serializers.ModelSerializer):
+    # This serializer provides much more information; use carefully.
+    pass
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
