@@ -1,3 +1,5 @@
+import sys
+
 from django.db.models import Q
 
 import django_filters
@@ -7,6 +9,7 @@ from rest_framework import status
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import detail_route, list_route
 
 from custom_auth.models import User
 from custom_auth.serializers import UserSerializer
@@ -44,6 +47,15 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         """
         companies = self.request.user.profile.companies.all()
         return Employee.objects.filter(Q(user__id=self.request.user.id) | Q(companies__in=companies))
+
+    @detail_route(methods=['get'])
+    def profile(self, request, pk=None):
+        """Return the requesting user's profile JSON."""
+        # Get the requesting user's profile
+        e = Employee.objects.get(user__id=request.user.id)
+        # Serialize it
+        serializer = EmployeeSerializer(instance=e)
+        return Response(serializer.data)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
