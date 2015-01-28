@@ -30,9 +30,16 @@ class Employee(models.Model):
 
     def join(self, company):
         ecm, created = Employment.objects.get_or_create(employee=self,
-                company=self)
+                company=company)
         ecm.accepted_by_employee = True
         ecm.save()
+
+    def has_accepted_employment_from(company):
+        try:
+            ecm = Employment.objects.get(employee=self, company=company)
+            return ecm.accepted_by_employee
+        except Employment.DoesNotExist:
+            return False
 
     
 class Company(models.Model):
@@ -56,6 +63,13 @@ class Company(models.Model):
                 company=self)
         ecm.accepted_by_company = True
         ecm.save()
+
+    def has_accepted(self, employee):
+        try:
+            ecm = Employment.objects.get(employee=employee, company=self)
+            return ecm.accepted_by_company
+        except Employment.DoesNotExist:
+            return False
 
 
     def fire(self, employee):
