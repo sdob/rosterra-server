@@ -34,12 +34,14 @@ class Employee(models.Model):
         ecm.accepted_by_employee = True
         ecm.save()
 
-    def has_accepted_employment_from(company):
-        try:
-            ecm = Employment.objects.get(employee=self, company=company)
-            return ecm.accepted_by_employee
-        except Employment.DoesNotExist:
-            return False
+    def leave(self, company):
+        ecm = Employment.objects.get(employee=self, company=company)
+        ecm.accepted_by_employee = False
+        ecm.save()
+
+    def has_accepted_employment_from(self, company):
+        ecm = Employment.objects.get(employee=self, company=company)
+        return ecm.accepted_by_employee
 
     
 class Company(models.Model):
@@ -69,11 +71,23 @@ class Company(models.Model):
             ecm = Employment.objects.get(employee=employee, company=self)
             return ecm.accepted_by_company
         except Employment.DoesNotExist:
+            # It's OK for the back-end to check whether an employment exists
+            # without failing if it doesn't
             return False
 
 
     def fire(self, employee):
-        pass
+        try:
+            ecm = Employment.objects.get(employee=employee, company=self)
+            ecm.accepted_by_company = False
+            ecm.save()
+        except Employment.DoesNotExist, e:
+            # This shouldn't be possible and should throw an exception if
+            # someone tries to make it happen; for now I'm just going to
+            # re-raise the exception
+            raise
+
+
 
     def __unicode__(self):
         return self.name
