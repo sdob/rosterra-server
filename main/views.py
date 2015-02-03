@@ -1,6 +1,8 @@
 import sys
+import datetime
 
 from django.db.models import Q
+from django.utils import timezone
 
 import django_filters
 from rest_framework import generics
@@ -8,6 +10,7 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
 
@@ -15,7 +18,7 @@ from custom_auth.models import User
 from custom_auth.serializers import UserSerializer
 from .serializers import EmployeeSerializer, CompanySerializer, LocationSerializer,\
         RosterEntrySerializer
-from .models import Employee, Company, Location
+from .models import Employee, Company, Location, Activity, RosterEntry
 from .permissions import IsManagerOrReadOnly
 
 
@@ -79,6 +82,7 @@ class LocationViewSet(viewsets.ModelViewSet):
         if 'company' in request.query_params:
             queryset = queryset.filter(company=request.query_params['company'])
         serializer = LocationSerializer(queryset, many=True)
+        #print serializer.data
         return Response(serializer.data)
 
     def create(self, request):
@@ -102,3 +106,31 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
         """
         companies = self.request.user.profile.companies.all()
         return RosterEntry.objects.get(company__in==companies)
+
+    def create(self, request):
+        try:
+            # First of all, check that the data we have make sense
+            company = Company.objects.get(id=request.data['company'])
+            # Fail early if this company isn't managed by the requesting user
+            if not company.is_managed_by(request.user.profile):
+                return self.permission_denied(request)
+            employee = Employee.objects.get(id=request.data['employee'])
+            activity = Activity.objects.get(id=request.data['activity'])
+            # Check that end time is after start time; if not, return
+            # HTTP 400
+            start_time = request.data['start']
+            end_time = request.data['end']
+            if not end_time > start_time:
+                return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data = {
+                            'detail': 'Roster entry start time is later than early time'
+                            }
+                        )
+                        # We've parsed the data and it's all OK
+            return super(viewsets.ModelViewSet, self).create(request)
+        finally:
+            pass
+        #except Error, e:
+            # If anything is weird, just deny the request
+            #return self.permission_denied(request)
