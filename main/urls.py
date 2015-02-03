@@ -11,5 +11,6 @@ router.register(r'users', views.UserViewSet)
 router.register(r'companies', views.CompanyViewSet)
 router.register(r'employees', views.EmployeeViewSet)
 router.register(r'locations', views.LocationViewSet)
+router.register(r'roster-entries', views.RosterEntryViewSet, base_name='roster_entry')
 
 urlpatterns = router.urls
