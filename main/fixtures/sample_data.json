@@ -317,6 +317,18 @@
 },
 {
     "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 7,
+        "date_added": "2015-01-20T15:46:14.253Z"
+    },
+    "model": "main.employment",
+    "pk": 15
+},
+{
+    "fields": {
         "name": "S\u00e9amus \u00d3 Buadhach\u00e1in",
         "is_active": true,
         "is_superuser": true,
