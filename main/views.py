@@ -1,6 +1,7 @@
 import sys
 import datetime
 
+from django import forms    
 from django.db.models import Q
 from django.utils import timezone
 
@@ -9,6 +10,7 @@ from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework import exceptions
+from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -17,8 +19,8 @@ from rest_framework.decorators import detail_route, list_route
 from custom_auth.models import User
 from custom_auth.serializers import UserSerializer
 from .serializers import EmployeeSerializer, CompanySerializer, LocationSerializer,\
-        RosterEntrySerializer
-from .models import Employee, Company, Location, Activity, RosterEntry
+        RosterEntrySerializer, EmploymentSerializer, ActivitySerializer
+from .models import Employee, Company, Location, Activity, RosterEntry, Employment
 from .permissions import IsManagerOrReadOnly
 
 
@@ -28,6 +30,20 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
 
+class ActivityViewSet(viewsets.ModelViewSet):
+    queryset = Activity.objects.none()
+    serializer_class = ActivitySerializer
+    permission_classes = (IsAuthenticated,)
+    def get_queryset(self):
+        return Activity.objects.filter(company__in=self.request.user.profile.companies.all())
+    def list(self, request):
+        queryset = self.get_queryset()
+        if 'company' in request.query_params:
+            queryset = queryset.filter(company=request.query_params['company'])
+        serializer = ActivitySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.none() # overridden by get_queryset
     serializer_class = CompanySerializer
@@ -35,6 +51,11 @@ class CompanyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Default queryset."""
         return self.request.user.profile.companies.all()
+
+    # TODO: We need to restrict the amount of info given out when listing
+    # (to just company id and name), and then for detail views decide based
+    # on the requesting user's role in the Company whether to hand out
+    # things like lists of Employees.
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -60,6 +81,18 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         serializer = EmployeeSerializer(instance=e)
         return Response(serializer.data)
 
+    # Employees who are managers can get lists of employees of the companies
+    # they manage.
+    def list(self, request):
+        employee = Employee.objects.get(user__id=request.user.id)
+        managed_employments = Employment.objects.filter(employee=employee, is_manager=True)
+        companies = [e.company for e in managed_employments]
+        queryset = Employee.objects.filter(companies__in=companies)
+        if 'company' in request.query_params:
+            queryset = queryset.filter(companies__in=request.query_params['company'])
+        serializer = EmployeeSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
@@ -82,7 +115,6 @@ class LocationViewSet(viewsets.ModelViewSet):
         if 'company' in request.query_params:
             queryset = queryset.filter(company=request.query_params['company'])
         serializer = LocationSerializer(queryset, many=True)
-        #print serializer.data
         return Response(serializer.data)
 
     def create(self, request):
@@ -95,6 +127,40 @@ class LocationViewSet(viewsets.ModelViewSet):
         return self.permission_denied(request)
 
 
+class EmploymentViewSet(viewsets.ModelViewSet):
+    serializer = EmploymentSerializer
+    queryset = Location.objects.none() # overriden by get_queryset
+    permission_classes = (IsAuthenticated,)
+    def get_queryset(self):
+        # Initial filtering reduces the set to those companies of which
+        # the user is a member
+        companies = self.request.user.profile.companies.all()
+        return Employment.objects.filter(company__in=companies)
+    def list(self, request):
+        e = request.user.profile
+        queryset = self.get_queryset()
+        # Filter on a single company if it's in the query params
+        if 'company' in request.query_params:
+            queryset = queryset.filter(company=request.query_params['company'])
+        # Filter on a single employee if it's in the query params
+        if 'employee' in request.query_params:
+            queryset = queryset.filter(employee=request.query_params['employee'])
+        # Complex query here that we'll OR together --- only return
+        # (a) employments involving this user, or
+        # (b) employments involving companies of which they're a manager
+        own_employments = Q(employee=e)
+        employments_of_managed_companies = Q(
+                company=Company.objects.filter(
+                    employment__in=Employment.objects.filter(employee=e, is_manager=True)
+                    )
+                )
+        queryset = queryset.filter(own_employments | employments_of_managed_companies)
+        # Serialize and return
+        s = self.serializer(queryset, many=True)
+        return Response(s.data)
+
+
+
 class RosterEntryViewSet(viewsets.ModelViewSet):
     serializer_class = RosterEntrySerializer
     queryset = Location.objects.none() # overridden by get_queryset
@@ -105,7 +171,42 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
         of which the requesting user is an employee.
         """
         companies = self.request.user.profile.companies.all()
-        return RosterEntry.objects.get(company__in==companies)
+        return RosterEntry.objects.filter(company__in=companies)
+    
+    def list(self, request):
+        # Get the initial queryset
+        queryset = self.get_queryset()
+        print request.query_params
+        # Filter by company if requested
+        if 'company' in request.query_params:
+            queryset = queryset.filter(company=request.query_params['company'])
+        # Filter by location if requested
+        if 'location' in request.query_params:
+            queryset = queryset.filter(location=request.query_params['location'])
+        # Filter by employee if requested
+        if 'employee' in request.query_params:
+            queryset = queryset.filter(employee=request.query_params['employee'])
+        # Filter by start date if requested
+        if 'start' in request.query_params:
+            print "parsing start"
+            try:
+                queryset = queryset.filter(start__gte=request.query_params['start'])
+            except forms.ValidationError:
+                return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={'detail': u'Invalid start time'}
+                        )
+        # Filter by end date if requested
+        if 'end' in request.query_params:
+            try:
+                queryset = queryset.filter(end__lte=request.query_params['end'])
+            except forms.ValidationError:
+                return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={'detail': u'Invalid end time'}
+                        )
+        # Return the filtered queryset
+        return Response(self.serializer_class(queryset, many=True).data)
 
     def create(self, request):
         try:
@@ -127,7 +228,7 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
                             'detail': 'Roster entry start time is later than early time'
                             }
                         )
-                        # We've parsed the data and it's all OK
+                # We've parsed the data and it's all OK
             return super(viewsets.ModelViewSet, self).create(request)
         finally:
             pass
