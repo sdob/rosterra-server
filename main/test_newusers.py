@@ -27,10 +27,13 @@ class UserCreationTestCase(APITestCase):
         expected_value = status.HTTP_200_OK
         self.assertEqual(response.status_code, expected_value)
 
-    def test_new_user_can_see_themselves(self):
-        response = self.client.get(reverse('employee-list'))
-        expected_response = EmployeeSerializer(
-                Employee.objects.filter(user=self.u),
-                many=True)
-        self.assertEqual(expected_response.data, response.data)
+    # I've removed this test because we want to return empty lists to
+    # users who request employee lists but are not managers of any company
+    if False:
+        def test_new_user_can_see_themselves(self):
+            response = self.client.get(reverse('employee-list'))
+            expected_response = EmployeeSerializer(
+                    Employee.objects.filter(user=self.u),
+                    many=True)
+            self.assertEqual(expected_response.data, response.data)
 
