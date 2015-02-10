@@ -12,5 +12,7 @@ router.register(r'companies', views.CompanyViewSet)
 router.register(r'employees', views.EmployeeViewSet)
 router.register(r'locations', views.LocationViewSet)
 router.register(r'roster-entries', views.RosterEntryViewSet, base_name='roster_entry')
+router.register(r'employments', views.EmploymentViewSet)
+router.register(r'activities', views.ActivityViewSet)
 
 urlpatterns = router.urls
