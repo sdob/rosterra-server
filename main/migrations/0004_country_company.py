@@ -8,7 +8,8 @@ import country_utils.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0004_data_migration'),
+        ('main', '0003_auto_20150120_1513'),
+        #('main', '0004_data_migration'),
     ]
 
     operations = [

@@ -13,7 +13,7 @@ def remove_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-            ('main', '0003_auto_20150120_1513'),
+            ('main', '0004_country_company')
             ]
 
     operations = [

@@ -8,6 +8,8 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
+from country_utils.fields import CountryField
+
 # We're using our own custom user model
 User = settings.AUTH_USER_MODEL
 
@@ -54,6 +56,9 @@ class Company(models.Model):
         verbose_name_plural = "companies" # for OCD's sake
     # Company's name
     name = models.CharField(max_length=200)
+    # Home country. Can be blank --- it's up to users to decide how much
+    # detail they want to add to the system
+    country = CountryField(null=True, blank=True)
     # M2M relationship with Employee class. Each Company can have multiple
     # employees and vice versa.
     employees = models.ManyToManyField(Employee,
@@ -135,6 +140,8 @@ class Employment(models.Model):
     is_manager = models.BooleanField(default=False)
     accepted_by_company = models.BooleanField(default=False)
     accepted_by_employee = models.BooleanField(default=False)
+    def __str__(self):
+        return "%s @ %s" % (self.employee.name, self.company.name)
 
 
 class Activity(models.Model):
