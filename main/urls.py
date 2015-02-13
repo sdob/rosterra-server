@@ -7,7 +7,7 @@ import views
 
 
 router = SimpleRouter()
-router.register(r'users', views.UserViewSet)
+#router.register(r'users', views.UserViewSet) # No reason to provide this endpoint
 router.register(r'companies', views.CompanyViewSet)
 router.register(r'employees', views.EmployeeViewSet)
 router.register(r'locations', views.LocationViewSet)
