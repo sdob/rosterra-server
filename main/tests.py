@@ -34,27 +34,20 @@ class LocationViewDetailTestCase(APITestCase):
         self.mayfield = Location.objects.create(name="Mayfield", company=self.apple)
 
     def test_users_can_list_locations_of_all_companies_employing_them(self):
-        timc = self.timc
-        microsoft = self.microsoft
-        apple = self.apple
         self.client.force_authenticate(user=self.timc)
         response = self.client.get(reverse('location-list'))
         self.assertEqual(len(response.data), 
-                len(microsoft.locations.all()) + len(apple.locations.all()))
+                len(self.microsoft.locations.all()) + len(self.apple.locations.all()))
 
     def test_users_cant_list_locations_of_companies_not_employing_them(self):
-        billg = self.billg
-        loc = self.cupertino
         self.client.force_authenticate(user=self.billg)
         response = self.client.get(reverse('location-list'))
-        self.assertFalse(LocationSerializer(loc).data in response.data)
+        self.assertFalse(LocationSerializer(self.cupertino).data in response.data)
 
     def test_users_can_view_locations_of_companies_employing_them(self):
-        timc = self.timc
-        loc = self.cupertino
         self.client.force_authenticate(user=self.timc)
-        response = self.client.get(reverse('location-detail', args=[loc.id]))
-        self.assertEqual(LocationSerializer(loc).data, response.data)
+        response = self.client.get(reverse('location-detail', args=[self.cupertino.id]))
+        self.assertEqual(LocationSerializer(self.cupertino).data, response.data)
 
     def test_users_cant_view_locations_of_companies_not_employing_them(self):
         billg = self.billg
@@ -72,8 +65,10 @@ class LocationViewDetailTestCase(APITestCase):
 
     def test_users_can_filter_locations_by_company(self):
         self.client.force_authenticate(user=self.timc)
-        response = self.client.get('%s?company=%s' % (reverse('location-list'), self.apple.id))
-        expected_response = LocationSerializer(Location.objects.filter(company=self.apple), many=True)
+        response = self.client.get('%s?company=%d' % (reverse('location-list'), self.apple.id))
+        expected_response = LocationSerializer(
+                Location.objects.filter(company=self.apple), many=True
+                )
         self.assertEqual(expected_response.data, response.data)
 
 
