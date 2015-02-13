@@ -1,8 +1,8 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 from rest_framework.renderers import JSONRenderer
 
-from .serializers import CompanySerializer as CS, CompanyManagementSerializer as CMS
-from .models import Company, Employee
+from main.serializers import CompanySerializer as CS, CompanyManagementSerializer as CMS
+from main.models import Company, Employee
 from custom_auth.models import User
 
 class CompanySerializerTestCase(APITestCase):

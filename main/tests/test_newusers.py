@@ -5,9 +5,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIRequestFactory
 from rest_framework.authtoken.models import Token
 from custom_auth.models import User
-from models import Company, Employment, Location, Employee
-from permissions import IsManagerOrReadOnly
-from serializers import EmployeeSerializer
+from main.models import Company, Employment, Location, Employee
+from main.permissions import IsManagerOrReadOnly
+from main.serializers import EmployeeSerializer
 
 class UserCreationTestCase(APITestCase):
 

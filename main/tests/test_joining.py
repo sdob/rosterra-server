@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 from custom_auth.models import User
-from models import Company, Employment, Location, Employee
+from main.models import Company, Employment, Location, Employee
 
 class JoiningTestCase(APITestCase):
 
@@ -32,7 +32,7 @@ class JoiningTestCase(APITestCase):
         except ValueError, e:
             pass
 
-    def test_hiring_something_that_isnt_a_company_throws_exception(self):
+    def test_hiring_something_that_isnt_an_employee_throws_exception(self):
         location = Location.objects.create(name='x', company=self.c)
         try:
             self.c.hire(location)
