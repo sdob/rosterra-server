@@ -19,7 +19,8 @@ from rest_framework.decorators import detail_route, list_route
 from custom_auth.models import User
 from custom_auth.serializers import UserSerializer
 from .serializers import EmployeeSerializer, CompanySerializer, LocationSerializer,\
-        RosterEntrySerializer, EmploymentSerializer, ActivitySerializer
+        RosterEntryReadSerializer, RosterEntryWriteSerializer, \
+        EmploymentSerializer, ActivitySerializer
 from .models import Employee, Company, Location, Activity, RosterEntry, Employment
 from .permissions import IsManagerOrReadOnly
 
@@ -128,8 +129,8 @@ class LocationViewSet(viewsets.ModelViewSet):
 
 
 class EmploymentViewSet(viewsets.ModelViewSet):
-    serializer = EmploymentSerializer
-    queryset = Location.objects.none() # overriden by get_queryset
+    serializer_class = EmploymentSerializer
+    queryset = Employment.objects.none() # overriden by get_queryset
     permission_classes = (IsAuthenticated,)
     def get_queryset(self):
         # Initial filtering reduces the set to those companies of which
@@ -156,15 +157,14 @@ class EmploymentViewSet(viewsets.ModelViewSet):
                 )
         queryset = queryset.filter(own_employments | employments_of_managed_companies)
         # Serialize and return
-        s = self.serializer(queryset, many=True)
+        s = self.serializer_class(queryset, many=True)
         return Response(s.data)
 
 
-
 class RosterEntryViewSet(viewsets.ModelViewSet):
-    serializer_class = RosterEntrySerializer
+    serializer_class = RosterEntryWriteSerializer
     queryset = Location.objects.none() # overridden by get_queryset
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsManagerOrReadOnly,)
     def get_queryset(self):
         """
         Default queryset: return all RosterEntries for all companies
@@ -176,10 +176,9 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
     def list(self, request):
         # Get the initial queryset
         queryset = self.get_queryset()
-        print request.query_params
         # Filter by company if requested
         if 'company' in request.query_params:
-            queryset = queryset.filter(company=request.query_params['company'])
+            queryset = queryset.filter(company_id=request.query_params['company'])
         # Filter by location if requested
         if 'location' in request.query_params:
             queryset = queryset.filter(location=request.query_params['location'])
@@ -188,7 +187,7 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(employee=request.query_params['employee'])
         # Filter by start date if requested
         if 'start' in request.query_params:
-            print "parsing start"
+            print "start: %s" % request.query_params['start']
             try:
                 queryset = queryset.filter(start__gte=request.query_params['start'])
             except forms.ValidationError:
@@ -205,8 +204,11 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                         data={'detail': u'Invalid end time'}
                         )
-        # Return the filtered queryset
-        return Response(self.serializer_class(queryset, many=True).data)
+        # Return the filtered queryset using the Read serializer
+        serializer = RosterEntryReadSerializer(queryset, many=True)
+        return Response(serializer.data)
+        #return Response(self.serializer_class(queryset, many=True).data)
+
 
     def create(self, request):
         try:
@@ -228,10 +230,16 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
                             'detail': 'Roster entry start time is later than early time'
                             }
                         )
-                # We've parsed the data and it's all OK
-            return super(viewsets.ModelViewSet, self).create(request)
+            # We've parsed the data and it's all OK
+            serializer = RosterEntryWriteSerializer(data=request.data)
+            if serializer.is_valid():
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                #serializer = RosterEntryReadSerializer(serializer.object)
+                serializer = RosterEntryReadSerializer(serializer.instance)
+                return Response(serializer.data,
+                        status=status.HTTP_201_CREATED, headers=headers)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            #return super(viewsets.ModelViewSet, self).create(request)
         finally:
             pass
-        #except Error, e:
-            # If anything is weird, just deny the request
-            #return self.permission_denied(request)
