@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         fighting_aliens = Activity.objects.create(name="Fighting xenomorphs",
                 company=wy)
         gorman = Employee.objects.get(user__email='gorman@example.com')
-        first_start_date = timezone.datetime(2015, 2, 5, 9)
+        first_start_date = timezone.datetime(2015, 2, 5, 9, tzinfo=timezone.utc)
         # Three months of fighting xenomorphs for Gorman
         for i in xrange(1,101):
             start_time = first_start_date + timezone.timedelta(days=i)
