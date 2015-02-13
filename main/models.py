@@ -92,8 +92,6 @@ class Company(models.Model):
             # re-raise the exception
             raise
 
-
-
     def __unicode__(self):
         return self.name
 
