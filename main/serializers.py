@@ -33,7 +33,11 @@ class EmploymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employment
 
-class RosterEntrySerializer(serializers.ModelSerializer):
+class RosterEntryWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RosterEntry
+
+class RosterEntryReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = RosterEntry
         depth = 1
