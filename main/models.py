@@ -151,6 +151,8 @@ class Activity(models.Model):
     """
     name = models.CharField(max_length=72)
     company = models.ForeignKey(Company, related_name="activity_types")
+    def __unicode__(self):
+        return "Activity: %s | %s" % (self.name, self.company.name)
 
 
 class RosterEntry(models.Model):
@@ -162,8 +164,8 @@ class RosterEntry(models.Model):
         verbose_name = 'roster_entry'
         verbose_name_plural = 'roster_entries'
 
-    employee = models.ForeignKey(Employee, related_name="activities")
-    company = models.ForeignKey(Company, related_name="activities")
+    employee = models.ForeignKey(Employee, related_name="rosterentries")
+    company = models.ForeignKey(Company, related_name="rosterentries")
     start = models.DateTimeField()
     end = models.DateTimeField()
     activity = models.ForeignKey(Activity)
