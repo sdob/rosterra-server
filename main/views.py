@@ -71,19 +71,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         viewing rights that employees don't.)
         """
         companies = self.request.user.profile.companies.all()
-        return Employee.objects.filter(Q(user__id=self.request.user.id) | Q(companies__in=companies))
-
-    @detail_route(methods=['get'])
-    def profile(self, request, pk=None):
-        """Return the requesting user's profile JSON."""
-        # Get the requesting user's profile
-        e = Employee.objects.get(user__id=request.user.id)
-        # Serialize it
-        serializer = EmployeeSerializer(instance=e)
-        return Response(serializer.data)
+        # Combining with Q() can return duplicates; an easy way to avoid this
+        # is to call distinct() on the returned queryset
+        return Employee.objects.filter(Q(user__id=self.request.user.id) | Q(companies__in=companies)).distinct()
 
     # Employees who are managers can get lists of employees of the companies
-    # they manage.
+    # they manage. 
+    # TODO: Non-manager Employees shouldn't be allowed to access this
+    # endpoint at all.
     def list(self, request):
         employee = Employee.objects.get(user__id=request.user.id)
         managed_employments = Employment.objects.filter(employee=employee, is_manager=True)
@@ -108,9 +103,7 @@ class LocationViewSet(viewsets.ModelViewSet):
         return Location.objects.filter(company__in=companies)
 
     def list(self, request):
-        """
-        Return the list of locations for the company specified in the request.
-        """
+        """Return the list of locations for the company specified in the request."""
         queryset = self.get_queryset()
         # Optionally, filter on company if in query parameters
         if 'company' in request.query_params:
