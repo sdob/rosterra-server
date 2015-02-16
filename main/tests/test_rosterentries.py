@@ -226,12 +226,42 @@ class UnpermittedPatchUpdates(PatchUpdateBase):
         # Correct start time
         self.assertEqual(self.re_old.start, re.start)
 
+    def test_patch_change_start_time_unauthenticated(self):
+        self.client.logout()
+        new_start = self.re_old.start + timezone.timedelta(minutes=1)
+        self.new_data['start'] = new_start
+        response = self.client.patch(self.patch_url, data=self.new_data)
+        # Status code is 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # No extra entry has been created
+        self.assertEqual(1, RosterEntry.objects.filter(employee=self.e.id).count())
+        re = RosterEntry.objects.get(employee=self.e.id)
+        # Same ID
+        self.assertEqual(self.re_old.id, re.id)
+        # Correct start time
+        self.assertEqual(self.re_old.start, re.start)
+
     def test_patch_change_end_time(self):
         new_end = self.re_old.end + timezone.timedelta(minutes=1)
         self.new_data['end'] = new_end
         response = self.client.patch(self.patch_url, data=self.new_data)
         # Status code is 403
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # No extra entry has been created
+        self.assertEqual(1, RosterEntry.objects.filter(employee=self.e.id).count())
+        re = RosterEntry.objects.get(employee=self.e.id)
+        # Same ID
+        self.assertEqual(self.re_old.id, re.id)
+        # Correct end time
+        self.assertEqual(self.re_old.end, re.end)
+
+    def test_patch_change_end_time_unauthenticated(self):
+        self.client.logout()
+        new_end = self.re_old.end + timezone.timedelta(minutes=1)
+        self.new_data['end'] = new_end
+        response = self.client.patch(self.patch_url, data=self.new_data)
+        # Status code is 401
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         # No extra entry has been created
         self.assertEqual(1, RosterEntry.objects.filter(employee=self.e.id).count())
         re = RosterEntry.objects.get(employee=self.e.id)
@@ -273,3 +303,49 @@ class UnpermittedPatchUpdates(PatchUpdateBase):
         self.assertEqual(self.re_old.id, re.id)
         # Correct activity ID
         self.assertEqual(self.a.id, re.activity.id)
+
+class DeleteBase(RosterEntryTestCaseBase):
+    def setUp(self):
+        super(DeleteBase, self).setUp()
+        # Object for the DELETE data
+        self.data = {'id': self.re_old.id}
+        # Get the DELETE URL
+        self.delete_url = reverse('roster_entry-detail', args=[self.re_old.id])
+
+class PermittedDeletes(DeleteBase):
+    def setUp(self):
+        super(PermittedDeletes, self).setUp()
+        self.client.force_authenticate(user=self.manager.user)
+
+    def test_delete(self):
+        count = RosterEntry.objects.all().count()
+        re = self.re_old
+        response = self.client.delete(self.delete_url)
+        new_count = RosterEntry.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(new_count, count - 1)
+        self.assertFalse(RosterEntry.objects.filter(pk=re.pk).exists())
+
+class UnpermittedDeletes(DeleteBase):
+    def setUp(self):
+        super(UnpermittedDeletes, self).setUp()
+        self.client.force_authenticate(user=self.e.user)
+
+    def test_delete(self):
+        count = RosterEntry.objects.all().count()
+        re = self.re_old
+        response = self.client.delete(self.delete_url)
+        new_count = RosterEntry.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(new_count, count)
+        self.assertTrue(RosterEntry.objects.filter(pk=re.pk).exists())
+
+    def test_delete_unauthenticated(self):
+        self.client.logout() # De-authenticate
+        count = RosterEntry.objects.all().count()
+        re = self.re_old
+        response = self.client.delete(self.delete_url)
+        new_count = RosterEntry.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(new_count, count)
+        self.assertTrue(RosterEntry.objects.filter(pk=re.pk).exists())
