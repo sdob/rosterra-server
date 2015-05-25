@@ -11,6 +11,3 @@ class ProfileTestCase(APITestCase):
     def test_get_profile(self):
         self.client.force_authenticate(self.gorman.user)
         response = self.client.get('/employees/%d/profile/' % self.gorman.id)
-        #self.client.force_authenticate(self.e.user)
-        #response = self.client.get('/employees/%d/profile/' % self.e.id)
-        #print response

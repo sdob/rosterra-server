@@ -4,6 +4,7 @@ import datetime
 from django import forms    
 from django.db.models import Q
 from django.utils import timezone
+from django.utils import dateparse
 
 import django_filters
 from rest_framework import generics
@@ -105,12 +106,13 @@ class EmployeeViewSet(
     
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        # Restrict fields if requesting user isn't the owner. This prevents
-        # 
+        serializer = self.get_serializer(instance)
+        # Restrict fields if requesting user isn't the owner.
         if not request.user == instance.user:
-            serializer = self.get_serializer(instance, fields=('id', 'name'))
-        else:
-            serializer = self.get_serializer(instance)
+            existing = set(serializer.fields)
+            allowed = set(['id', 'name'])
+            for field in existing - allowed:
+                serializer.fields.pop(field)
         return Response(serializer.data)
 
 
@@ -202,22 +204,31 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(employee=request.query_params['employee'])
         # Filter by start date if requested
         if 'start' in request.query_params:
+            bad_request_response = Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={'detail': u'Invalid start time'}
+                    )
+            # Check that the start time parses correctly
+            start_time = dateparse.parse_datetime(request.query_params['start'])
+            if not start_time:
+                return bad_request_response
             try:
-                queryset = queryset.filter(start__gte=request.query_params['start'])
+                queryset = queryset.filter(start__gte=start_time)
             except forms.ValidationError:
-                return Response(
-                        status=status.HTTP_400_BAD_REQUEST,
-                        data={'detail': u'Invalid start time'}
-                        )
+                return bad_request_response
         # Filter by end date if requested
         if 'end' in request.query_params:
+            bad_request_response = Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={'detail': u'Invalid start time'}
+                    )
+            end_time = dateparse.parse_datetime(request.query_params['end'])
+            if not end_time:
+                return bad_request_response
             try:
-                queryset = queryset.filter(end__lte=request.query_params['end'])
+                queryset = queryset.filter(end__lte=end_time)
             except forms.ValidationError:
-                return Response(
-                        status=status.HTTP_400_BAD_REQUEST,
-                        data={'detail': u'Invalid end time'}
-                        )
+                return bad_request_response
         # Return the filtered queryset using the Read serializer
         serializer = RosterEntryReadSerializer(queryset, many=True)
         return Response(serializer.data)

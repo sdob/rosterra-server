@@ -34,8 +34,8 @@ class RosterEntryTestCaseBase(APITestCase):
                 'company': self.c.id,
                 'employee': self.e.id,
                 'activity': self.a.id,
-                'start': self.start.strftime('%Y-%m-%dT%H:%M:%S'),
-                'end': self.end.strftime('%Y-%m-%dT%H:%M:%S')
+                'start': self.start.isoformat(), #self.start.strftime('%Y-%m-%dT%H:%M:%S'),
+                'end': self.end.isoformat() #.strftime('%Y-%m-%dT%H:%M:%S')
                 }
         RosterEntry.objects.create(company=self.c,
                 employee=self.e,
@@ -50,12 +50,6 @@ class RosterEntryTestCaseBase(APITestCase):
 
 class List(RosterEntryTestCaseBase):
 
-    def test_filter_on_start_time_include(self):
-        self.client.force_authenticate(user=self.manager.user)
-        response = self.client.get(reverse('roster_entry-list') + 
-                '?start=%s' % (self.start - timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S'))
-        self.assertEqual(len(response.data), 1)
-
     def test_filter_on_bad_start_time(self):
         self.client.force_authenticate(user=self.manager.user)
         self.client.post(reverse('roster_entry-list'), data=self.base_data)
@@ -67,16 +61,25 @@ class List(RosterEntryTestCaseBase):
         response = self.client.get(reverse('roster_entry-list') + '?end=')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_filter_on_start_time_include(self):
+        self.client.force_authenticate(user=self.manager.user)
+        time_string = (self.start - timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        response = self.client.get(reverse('roster_entry-list') + '?start=%s' % time_string)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
     def test_filter_on_start_time_exclude(self):
         self.client.force_authenticate(user=self.manager.user)
-        response = self.client.get(reverse('roster_entry-list') + 
-                '?start=%s' % (self.start + timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ'))
+        time_string = (self.start + timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        response = self.client.get(reverse('roster_entry-list') + '?start=%s' % time_string)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
     def test_filter_on_end_time_include(self):
         self.client.force_authenticate(user=self.manager.user)
         end_string = (self.end + timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
         response = self.client.get(reverse('roster_entry-list') + '?end=%s' % end_string)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
     def test_filter_on_end_time_exclude(self):
@@ -84,6 +87,7 @@ class List(RosterEntryTestCaseBase):
         self.client.post(reverse('roster_entry-list'), data=self.base_data)
         end_string = (self.end - timezone.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
         response = self.client.get(reverse('roster_entry-list') + '?end=%s' % end_string)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
     
 

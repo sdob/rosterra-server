@@ -105,7 +105,6 @@ class Patch(Base):
         data = {'name': 'Oracle'}
         response = self.client.patch(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        print response.status_code, response.data
 
 class Delete(Base):
 

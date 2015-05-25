@@ -43,8 +43,6 @@ class Create(EmployeeTestCaseBase):
                 'user': self.e.user.id
                 }
         self.client.force_authenticate(self.e.user)
-        #response = self.client.post(reverse('employee-list'), data=data)
-        #print response
 
 class Retrieve(EmployeeTestCaseBase):
 
@@ -53,7 +51,6 @@ class Retrieve(EmployeeTestCaseBase):
         response = self.client.get(reverse('employee-detail', args=[self.e.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK) # status code
         d = response.data
-        print d
         self.assertEqual(d['email'], self.e.email)
         self.assertEqual(d['name'], self.e.name)
         self.assertEqual(d['address_line_1'], self.e.address_line_1)

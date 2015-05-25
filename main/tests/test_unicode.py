@@ -19,4 +19,3 @@ class UnicodeLocationNameTestCase(APITestCase):
         l = Location(name=u"ó", company=self.c)
         l.save()
         s = LocationSerializer(instance=l)
-        print s.data

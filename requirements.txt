@@ -6,7 +6,7 @@ django-filter==0.9.1
 django-sslserver==0.14
 django-storages==1.1.8
 django-timezone-field==1.2
-djangorestframework==3.0.0
+djangorestframework==3.0.3
 psycopg2==2.5.3
 six==1.8.0
 wsgiref==0.1.2
