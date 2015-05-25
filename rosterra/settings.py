@@ -36,16 +36,16 @@ INSTALLED_APPS = (
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        'rest_framework', # RESTful API 
+        'rest_framework', # REST API 
         'rest_framework.authtoken', # token-based authentication for DRF
         'sslserver', # SSL-enabled development server
         'corsheaders', # Enable CORS (Cross-Origin Resouce Sharing)
         'custom_auth', # our custom auth app
         'storages', # enable S3 storage
         'main', # main Rosterra app
-        'country_utils',
+        'country_utils', # quick and dirty country app
         'timezone_field', # store timezones in the db
-        'django_nose',
+        'django_nose', # better tests
         )
 
 MIDDLEWARE_CLASSES = (
@@ -71,11 +71,10 @@ DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'rosterra_db',
-            #'HOST': '/opt/bitnami/postgresql',
             'HOST': 'localhost',
             'PORT': '5432',
             'USER': 'rosterra_user',
-            'PASSWORD': 'O%&3vvC0rJfAE1L^W7XvqWeM2Dw2F2lBHwf$L19Hw6YdS4CSPY'
+            'PASSWORD': 'pass'
             }
         }
 
