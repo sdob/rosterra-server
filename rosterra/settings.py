@@ -70,7 +70,8 @@ DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'rosterra_db',
-            'HOST': '/opt/bitnami/postgresql',
+            #'HOST': '/opt/bitnami/postgresql',
+            'HOST': 'localhost',
             'PORT': '5432',
             'USER': 'rosterra_user',
             'PASSWORD': 'O%&3vvC0rJfAE1L^W7XvqWeM2Dw2F2lBHwf$L19Hw6YdS4CSPY'
