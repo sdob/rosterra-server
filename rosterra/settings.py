@@ -45,6 +45,7 @@ INSTALLED_APPS = (
         'main', # main Rosterra app
         'country_utils',
         'timezone_field', # store timezones in the db
+        'django_nose',
         )
 
 MIDDLEWARE_CLASSES = (
@@ -144,3 +145,6 @@ STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 
 MEDIAFILES_LOCATION = 'media'
 MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
+
+# Use django-nose to run tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

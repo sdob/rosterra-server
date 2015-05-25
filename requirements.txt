@@ -3,6 +3,7 @@ PyYAML==3.11
 argparse==1.2.1
 django-cors-headers==1.0.0
 django-filter==0.9.1
+django-nose=1.4
 django-sslserver==0.14
 django-storages==1.1.8
 django-timezone-field==1.2
