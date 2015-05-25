@@ -1,0 +1,12 @@
+Django==1.7.1
+PyYAML==3.11
+argparse==1.2.1
+django-cors-headers==1.0.0
+django-filter==0.9.1
+django-sslserver==0.14
+django-storages==1.1.8
+django-timezone-field==1.2
+djangorestframework==3.0.0
+psycopg2==2.5.3
+six==1.8.0
+wsgiref==0.1.2
