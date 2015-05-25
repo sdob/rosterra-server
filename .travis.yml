@@ -5,7 +5,7 @@ install:
   - pip install -r requirements.txt
   - pip install coveralls
   - psql -c "create database rosterra_db" -U postgres
-  - psql -c "create user rosterra_user with password 'pass'"
+  - psql -c "create user rosterra_user with password 'pass'" -U postgres
   - psql -c "alter user rosterra_user createdb" -U postgres
   - python manage.py migrate --noinput
 #script: ./manage.py test --with-coverage --cover-package=custom_auth,main
