@@ -1,0 +1,13 @@
+[run]
+omit =
+  *__init__*
+  */usr/local/lib*
+  *test_*
+  */migrations/*
+
+[html]
+omit =
+  *__init__*
+  */usr/local/lib*
+  *test_*
+  */migrations/*
