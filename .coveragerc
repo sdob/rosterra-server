@@ -1,4 +1,5 @@
 [run]
+source=custom_auth,main
 omit =
   *__init__*
   */usr/local/lib*
