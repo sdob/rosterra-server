@@ -1,0 +1,317 @@
+[
+{
+    "fields": {
+        "name": "Rosterra"
+    },
+    "model": "main.company",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "Weyland-Yutani"
+    },
+    "model": "main.company",
+    "pk": 2
+},
+{
+    "fields": {
+        "name": "LexCorp"
+    },
+    "model": "main.company",
+    "pk": 3
+},
+{
+    "fields": {
+        "name": "FrobozzCo"
+    },
+    "model": "main.company",
+    "pk": 4
+},
+{
+    "fields": {
+        "company": 1,
+        "name": "Cork"
+    },
+    "model": "main.location",
+    "pk": 1
+},
+{
+    "fields": {
+        "company": 1,
+        "name": "Limerick"
+    },
+    "model": "main.location",
+    "pk": 2
+},
+{
+    "fields": {
+        "company": 1,
+        "name": "Honolulu"
+    },
+    "model": "main.location",
+    "pk": 3
+},
+{
+    "fields": {
+        "company": 1,
+        "name": "Minsk"
+    },
+    "model": "main.location",
+    "pk": 4
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Alderaan"
+    },
+    "model": "main.location",
+    "pk": 5
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Bespin"
+    },
+    "model": "main.location",
+    "pk": 6
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Coruscant"
+    },
+    "model": "main.location",
+    "pk": 7
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Dagobah"
+    },
+    "model": "main.location",
+    "pk": 8
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Hoth"
+    },
+    "model": "main.location",
+    "pk": 9
+},
+{
+    "fields": {
+        "company": 2,
+        "name": "Kashyyyk"
+    },
+    "model": "main.location",
+    "pk": 10
+},
+{
+    "fields": {
+        "company": 4,
+        "name": "Anthar"
+    },
+    "model": "main.location",
+    "pk": 11
+},
+{
+    "fields": {
+        "company": 4,
+        "name": "Borphee"
+    },
+    "model": "main.location",
+    "pk": 12
+},
+{
+    "fields": {
+        "company": 4,
+        "name": "Mareilon"
+    },
+    "model": "main.location",
+    "pk": 13
+},
+{
+    "fields": {
+        "company": 4,
+        "name": "Mizniaport"
+    },
+    "model": "main.location",
+    "pk": 14
+},
+{
+    "fields": {
+        "company": 4,
+        "name": "Port Foozle"
+    },
+    "model": "main.location",
+    "pk": 15
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 3,
+        "date_added": "2015-01-20T15:22:01.194Z"
+    },
+    "model": "main.employment",
+    "pk": 1
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 4,
+        "date_added": "2015-01-20T15:25:14.677Z"
+    },
+    "model": "main.employment",
+    "pk": 2
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 5,
+        "date_added": "2015-01-20T15:25:14.754Z"
+    },
+    "model": "main.employment",
+    "pk": 3
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 6,
+        "date_added": "2015-01-20T15:25:14.854Z"
+    },
+    "model": "main.employment",
+    "pk": 4
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": true,
+        "accepted_by_employee": true,
+        "employee": 7,
+        "date_added": "2015-01-20T15:25:14.881Z"
+    },
+    "model": "main.employment",
+    "pk": 5
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 8,
+        "date_added": "2015-01-20T15:25:14.906Z"
+    },
+    "model": "main.employment",
+    "pk": 6
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 9,
+        "date_added": "2015-01-20T15:25:14.929Z"
+    },
+    "model": "main.employment",
+    "pk": 7
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 2,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 10,
+        "date_added": "2015-01-20T15:25:14.947Z"
+    },
+    "model": "main.employment",
+    "pk": 8
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 11,
+        "date_added": "2015-01-20T15:46:13.833Z"
+    },
+    "model": "main.employment",
+    "pk": 9
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 12,
+        "date_added": "2015-01-20T15:46:14.186Z"
+    },
+    "model": "main.employment",
+    "pk": 10
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 13,
+        "date_added": "2015-01-20T15:46:14.202Z"
+    },
+    "model": "main.employment",
+    "pk": 11
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 14,
+        "date_added": "2015-01-20T15:46:14.218Z"
+    },
+    "model": "main.employment",
+    "pk": 12
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 15,
+        "date_added": "2015-01-20T15:46:14.236Z"
+    },
+    "model": "main.employment",
+    "pk": 13
+},
+{
+    "fields": {
+        "accepted_by_company": true,
+        "company": 4,
+        "is_manager": false,
+        "accepted_by_employee": false,
+        "employee": 16,
+        "date_added": "2015-01-20T15:46:14.253Z"
+    },
+    "model": "main.employment",
+    "pk": 14
+},

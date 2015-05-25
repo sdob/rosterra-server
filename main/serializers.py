@@ -5,14 +5,21 @@ from custom_auth.serializers import UserSerializer
 from models import Employee, Company, Employment, Location, RosterEntry, Activity
 
 class EmployeeSerializer(serializers.ModelSerializer):
+    # Provides fairly full access
     class Meta:
         model = Employee
-        #read_only_fields = ('user',)
-        fields = ('id', 'name', )
+        fields = ('id', 'name', 'email',
+                'address_line_1', 'address_line_2',
+                'city', 'country')
 
-class EmployeeFullSerializer(serializers.ModelSerializer):
-    # This serializer provides much more information; use carefully.
-    pass
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+        super(EmployeeSerializer, self).__init__(*args, **kwargs)
+        if fields is not None:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,6 +37,8 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
 
 class EmploymentSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.name', read_only=True)
+    company_name = serializers.CharField(source='company.name', read_only=True)
     class Meta:
         model = Employment
 

@@ -48,10 +48,7 @@ class RosterEntryTestCaseBase(APITestCase):
         # Store a count of the RosterEntries
         self.count = RosterEntry.objects.all().count()
 
-class ListTestCase(RosterEntryTestCaseBase):
-
-    def setUp(self):
-        super(ListTestCase, self).setUp()
+class List(RosterEntryTestCaseBase):
 
     def test_filter_on_start_time_include(self):
         self.client.force_authenticate(user=self.manager.user)
@@ -90,10 +87,7 @@ class ListTestCase(RosterEntryTestCaseBase):
         self.assertEqual(len(response.data), 0)
     
 
-class CreateTestCase(RosterEntryTestCaseBase):
-
-    def setUp(self):
-        super(CreateTestCase, self).setUp()
+class Create(RosterEntryTestCaseBase):
 
     def test_non_manager_cant_create_roster_entry(self):
         count = RosterEntry.objects.filter(company=self.c).count()
@@ -135,9 +129,9 @@ class PatchUpdateBase(RosterEntryTestCaseBase):
         self.patch_url = reverse('roster_entry-detail', args=[self.re_old.id])
 
 
-class PermittedPatchUpdates(PatchUpdateBase):
+class PatchPermitted(PatchUpdateBase):
     def setUp(self):
-        super(PermittedPatchUpdates, self).setUp()
+        super(PatchPermitted, self).setUp()
         # Log in as manager
         self.client.force_authenticate(user=self.manager.user)
 
@@ -206,9 +200,9 @@ class PermittedPatchUpdates(PatchUpdateBase):
         self.assertEqual(self.a2.id, re.activity.id)
 
 
-class UnpermittedPatchUpdates(PatchUpdateBase):
+class PatchUnpermitted(PatchUpdateBase):
     def setUp(self):
-        super(UnpermittedPatchUpdates, self).setUp()
+        super(PatchUnpermitted, self).setUp()
         # Log in as employee
         self.client.force_authenticate(user=self.e.user)
 
@@ -312,9 +306,10 @@ class DeleteBase(RosterEntryTestCaseBase):
         # Get the DELETE URL
         self.delete_url = reverse('roster_entry-detail', args=[self.re_old.id])
 
-class PermittedDeletes(DeleteBase):
+class DeletePermitted(DeleteBase):
+
     def setUp(self):
-        super(PermittedDeletes, self).setUp()
+        super(DeletePermitted, self).setUp()
         self.client.force_authenticate(user=self.manager.user)
 
     def test_delete(self):
@@ -326,9 +321,9 @@ class PermittedDeletes(DeleteBase):
         self.assertEqual(new_count, count - 1)
         self.assertFalse(RosterEntry.objects.filter(pk=re.pk).exists())
 
-class UnpermittedDeletes(DeleteBase):
+class DeleteUnpermitted(DeleteBase):
     def setUp(self):
-        super(UnpermittedDeletes, self).setUp()
+        super(DeleteUnpermitted, self).setUp()
         self.client.force_authenticate(user=self.e.user)
 
     def test_delete(self):

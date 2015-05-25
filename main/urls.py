@@ -16,3 +16,8 @@ router.register(r'employments', views.EmploymentViewSet)
 router.register(r'activities', views.ActivityViewSet)
 
 urlpatterns = router.urls
+
+# Add simple endpoint for retrieving list of countries
+urlpatterns += (
+        url(r'^countries/$', views.CountryListView.as_view()),
+        )

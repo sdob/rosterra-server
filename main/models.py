@@ -17,6 +17,20 @@ class Employee(models.Model):
     # Class Employee is an extension to the User model. All users are
     # nominally Employees.
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
+    # Contact details are stored on the profile model. Default is blank
+    # because they're optional and we don't mind if users don't want to
+    # add this at create time. The default is a blank string, FTR.
+    #
+    # TODO: This is a very low-tech implementation of physical addresses and
+    # will probably have to be changed in production. I'm using a max length
+    # of 200. I can't imagine why this would be less than excessive. That
+    # said, how often is this information going to be read/written?
+    # It's some of the most static 
+    address_line_1 = models.CharField(blank=True, max_length=200, default="")
+    address_line_2 = models.CharField(blank=True, max_length=200, default="")
+    city = models.CharField(blank=True, max_length=200, default="")
+    country = CountryField(blank=True, null=True)
+
 
     def __unicode__(self):
         return self.name
@@ -29,6 +43,10 @@ class Employee(models.Model):
     def name(self, name):
         self.user.name = name
         self.user.save()
+
+    @property
+    def email(self):
+        return self.user.email
 
     def join(self, company):
         ecm, created = Employment.objects.get_or_create(employee=self,
@@ -65,10 +83,11 @@ class Company(models.Model):
             related_name='companies',
             through='Employment')
 
-    def hire(self, employee):
+    def hire(self, employee, is_manager=False):
         ecm, created = Employment.objects.get_or_create(employee=employee,
                 company=self)
         ecm.accepted_by_company = True
+        ecm.is_manager = is_manager
         ecm.save()
 
     def has_accepted(self, employee):

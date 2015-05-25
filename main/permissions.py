@@ -20,3 +20,16 @@ class IsManagerOrReadOnly(permissions.BasePermission):
             return has_perm
         # If something is not 'managed_by'-relevant, then return False
         return False
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Only allow write access if the object is foreign-keyed to
+    the profile of the requesting user.
+    """
+    def has_object_permission(self, request, view, obj):
+        if hasattr(obj, 'user'):
+            if request.method in permissions.SAFE_METHODS:
+                return True
+            return request.user == obj.user
+        #print "no employee found"
+        return False

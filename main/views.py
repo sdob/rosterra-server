@@ -8,21 +8,30 @@ from django.utils import timezone
 import django_filters
 from rest_framework import generics
 from rest_framework import viewsets
+from rest_framework import views
 from rest_framework import status
 from rest_framework import exceptions
 from rest_framework import serializers
+from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
 
+from country_utils.countries import COUNTRY_CHOICES
 from custom_auth.models import User
 from custom_auth.serializers import UserSerializer
-from .serializers import EmployeeSerializer, CompanySerializer, LocationSerializer,\
+from .serializers import EmployeeSerializer, \
+        CompanySerializer, LocationSerializer,\
         RosterEntryReadSerializer, RosterEntryWriteSerializer, \
         EmploymentSerializer, ActivitySerializer
 from .models import Employee, Company, Location, Activity, RosterEntry, Employment
-from .permissions import IsManagerOrReadOnly
+from .permissions import IsManagerOrReadOnly, IsOwnerOrReadOnly
+
+class CountryListView(views.APIView):
+    def get(self, request, format=None):
+        countries = [{'id': c[0], 'name': unicode(c[1])} for c in COUNTRY_CHOICES]
+        return Response(countries)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -59,10 +68,17 @@ class CompanyViewSet(viewsets.ModelViewSet):
     # things like lists of Employees.
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+# Employee objects are undeletable and uncreatable through the REST API,
+# so we can't just inherit from ModelViewSet. Instead we explicitly mix
+# in the behaviour we need.
+class EmployeeViewSet(
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.ListModelMixin,
+        viewsets.GenericViewSet):
     queryset = Employee.objects.none() # overridden by get_queryset
     serializer_class = EmployeeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
     def get_queryset(self):
         """
         By default, users can view their own profile, plus those
@@ -76,9 +92,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         return Employee.objects.filter(Q(user__id=self.request.user.id) | Q(companies__in=companies)).distinct()
 
     # Employees who are managers can get lists of employees of the companies
-    # they manage. 
-    # TODO: Non-manager Employees shouldn't be allowed to access this
-    # endpoint at all.
+    # they manage. Non-employees get an empty list.
     def list(self, request):
         employee = Employee.objects.get(user__id=request.user.id)
         managed_employments = Employment.objects.filter(employee=employee, is_manager=True)
@@ -88,6 +102,16 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(companies__in=request.query_params['company'])
         serializer = EmployeeSerializer(queryset, many=True)
         return Response(serializer.data)
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Restrict fields if requesting user isn't the owner. This prevents
+        # 
+        if not request.user == instance.user:
+            serializer = self.get_serializer(instance, fields=('id', 'name'))
+        else:
+            serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -95,10 +119,8 @@ class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.none() # overriden by get_queryset
     permission_classes = (IsAuthenticated, IsManagerOrReadOnly,)
     def get_queryset(self):
-        """
-        Default queryset: return all Locations owned by all companies
-        of which the requesting user is an employee.
-        """
+        """ Return all Locations owned by all companies
+        of which the requesting user is an employee."""
         companies = self.request.user.profile.companies.all()
         return Location.objects.filter(company__in=companies)
 
@@ -180,7 +202,6 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(employee=request.query_params['employee'])
         # Filter by start date if requested
         if 'start' in request.query_params:
-            print "start: %s" % request.query_params['start']
             try:
                 queryset = queryset.filter(start__gte=request.query_params['start'])
             except forms.ValidationError:
@@ -200,18 +221,18 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
         # Return the filtered queryset using the Read serializer
         serializer = RosterEntryReadSerializer(queryset, many=True)
         return Response(serializer.data)
-        #return Response(self.serializer_class(queryset, many=True).data)
 
 
     def create(self, request):
         try:
             # First of all, check that the data we have make sense
             company = Company.objects.get(id=request.data['company'])
-            # Fail early if this company isn't managed by the requesting user
-            if not company.is_managed_by(request.user.profile):
-                return self.permission_denied(request)
             employee = Employee.objects.get(id=request.data['employee'])
             activity = Activity.objects.get(id=request.data['activity'])
+            # Fail early if the requesting user isn't a manager of
+            # this company
+            if not company.is_managed_by(request.user.profile):
+                return self.permission_denied(request)
             # Check that end time is after start time; if not, return
             # HTTP 400
             start_time = request.data['start']
@@ -220,19 +241,19 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
                 return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data = {
-                            'detail': 'Roster entry start time is later than early time'
+                            'detail': 'Start time is later than end time'
                             }
                         )
-            # We've parsed the data and it's all OK
+            # We've parsed the data and it's all OK; use the Write
+            # serializer to create the instance and return it using
+            # the Read serializer.
             serializer = RosterEntryWriteSerializer(data=request.data)
             if serializer.is_valid():
                 self.perform_create(serializer)
                 headers = self.get_success_headers(serializer.data)
-                #serializer = RosterEntryReadSerializer(serializer.object)
                 serializer = RosterEntryReadSerializer(serializer.instance)
                 return Response(serializer.data,
                         status=status.HTTP_201_CREATED, headers=headers)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            #return super(viewsets.ModelViewSet, self).create(request)
         finally:
             pass

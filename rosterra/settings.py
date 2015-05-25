@@ -36,12 +36,15 @@ INSTALLED_APPS = (
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        'main', # main Rosterra app
-        'custom_auth', # our custom auth app
         'rest_framework', # RESTful API 
         'rest_framework.authtoken', # token-based authentication for DRF
         'sslserver', # SSL-enabled development server
         'corsheaders', # Enable CORS (Cross-Origin Resouce Sharing)
+        'custom_auth', # our custom auth app
+        'storages', # enable S3 storage
+        'main', # main Rosterra app
+        'country_utils',
+        'timezone_field', # store timezones in the db
         )
 
 MIDDLEWARE_CLASSES = (
@@ -67,8 +70,10 @@ DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'rosterra_db',
+            'HOST': '/opt/bitnami/postgresql',
+            'PORT': '5432',
             'USER': 'rosterra_user',
-            'PASSWORD': 'pass',
+            'PASSWORD': 'O%&3vvC0rJfAE1L^W7XvqWeM2Dw2F2lBHwf$L19Hw6YdS4CSPY'
             }
         }
 
@@ -85,7 +90,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-STATIC_URL = '/static/'
+#STATIC_URL = '/static/'
 
 ###############################################################################
 # Standard Django settings end here; below are very Rosterra-specific
@@ -117,6 +122,24 @@ REST_FRAMEWORK = {
 
 # CORS header settings. For development, these are whitelisted.
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-        'localhost',
-        )
+# CORS_ORIGIN_WHITELIST = (
+        #'localhost',
+        #'http://localhost:9000',
+        #'54.154.121.74',
+        #'52.16.209.241:9000'
+        #) 
+
+# S3 storage stuff
+AWS_STORAGE_BUCKET_NAME = 'com.rosterra.media'
+AWS_ACCESS_KEY_ID = 'AKIAIRSTQKT2S7AEL7QQ'
+AWS_SECRET_ACCESS_KEY = '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'
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazon.aws.com' % AWS_STORAGE_BUCKET_NAME
+
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATICFILES_LOCATION = 'static'
+STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+
+MEDIAFILES_LOCATION = 'media'
+MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)

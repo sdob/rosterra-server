@@ -13,7 +13,8 @@ def remove_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-            ('main', '0004_country_company')
+            #('main', '0004_country_company'),
+            ('main', '0010_add_employee_addresses'),
             ]
 
     operations = [
