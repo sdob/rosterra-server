@@ -8,6 +8,6 @@ install:
   - psql -c "create user rosterra_user with password 'O%&3vvC0rJfAE1L^W7XvqWeM2Dw2F2lBHwf$L19Hw6YdS4CSPY'" -U postgres
   - psql -c "alter user rosterra_user createdb" -U postgres
   - python manage.py migrate --noinput
-script: ./manage.py test
+script: ./manage.py test --with-coverage
 after_success:
   - coveralls
