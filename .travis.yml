@@ -2,4 +2,8 @@ language: python
 services:
   - postgresql
 install: "pip install -r requirements.txt"
+before-script:
+  - psql -c "create database rosterra_db" -U postgres
+  - psql -c "create user rosterra_user with password 'O%&3vvC0rJfAE1L^W7XvqWeM2Dw2F2lBHwf$L19Hw6YdS4CSPY'" -U postgres
+  - python manage.py migrate --noinput
 script: ./manage.py test
