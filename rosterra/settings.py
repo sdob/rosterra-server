@@ -136,8 +136,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 #STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 #STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 
-MEDIAFILES_LOCATION = 'media'
-MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
+#MEDIAFILES_LOCATION = 'media'
+#MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
 
 # Use django-nose to run tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
