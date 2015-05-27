@@ -144,8 +144,11 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # Heroku settings
 import dj_database_url
-# Parse database configuration from $DATABASE_URL
-DATABASES['default'] = dj_database_url.config()
+# Set the db configuration to what Heroku wants if there's a DATABASE_URL 
+# environment variable defined
+if os.environ.has_key('DATABASE_URL'):
+    # Parse database configuration from $DATABASE_URL
+    DATABASES['default'] = dj_database_url.config()
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
