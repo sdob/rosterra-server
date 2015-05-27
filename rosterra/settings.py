@@ -130,20 +130,31 @@ CORS_ORIGIN_ALLOW_ALL = True
         #'52.16.209.241:9000'
         #) 
 
-# S3 storage stuff
-AWS_STORAGE_BUCKET_NAME = 'com.rosterra.media'
-AWS_ACCESS_KEY_ID = 'AKIAIRSTQKT2S7AEL7QQ'
-AWS_SECRET_ACCESS_KEY = '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'
 
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazon.aws.com' % AWS_STORAGE_BUCKET_NAME
-
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-STATICFILES_LOCATION = 'static'
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+#STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#STATICFILES_LOCATION = 'static'
+#STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+#STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 
 MEDIAFILES_LOCATION = 'media'
 MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
 
 # Use django-nose to run tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Heroku settings
+import dj_database_url
+# Parse database configuration from $DATABASE_URL
+DATABASES['default'] = dj_database_url.config()
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Allow all host headers
+ALLOWED_HOSTS = ['*']
+
+# Static asset configuration (for Heroku)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_ROOT = 'staticfiles'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, 'static')
+        )
