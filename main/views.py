@@ -220,7 +220,7 @@ class RosterEntryViewSet(viewsets.ModelViewSet):
         if 'end' in request.query_params:
             bad_request_response = Response(
                     status=status.HTTP_400_BAD_REQUEST,
-                    data={'detail': u'Invalid start time'}
+                    data={'detail': u'Invalid end time'}
                     )
             end_time = dateparse.parse_datetime(request.query_params['end'])
             if not end_time:
